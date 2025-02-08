@@ -26,7 +26,8 @@ app.post("/generate-image", async (req, res) => {
         const response = await axios.post(
             "https://api.replicate.com/v1/predictions",
             {
-                version: "stability-ai/stable-diffusion",
+                version: "db21a74b-4a19-49bc-bb17-9fda55a04c6c", // <-- Usar el ID correcto de Replicate
+
                 input: { prompt: prompt }
             },
             {
