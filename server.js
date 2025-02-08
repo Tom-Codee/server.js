@@ -22,13 +22,9 @@ app.post("/generate-image", async (req, res) => {
         const response = await axios.post(
             "https://api-inference.huggingface.co/models/CompVis/stable-diffusion-v1-4",
             { inputs: prompt },
-            {
-                headers: {
-                    "Authorization": `Bearer ${HUGGINGFACE_API_KEY}`,
-                    "Content-Type": "application/json"
-                }
-            }
+            { headers: { Authorization: `Bearer ${HUGGINGFACE_API_KEY}` } }
         );
+
 
         if (response.data.error) {
             throw new Error(response.data.error);
