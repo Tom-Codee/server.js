@@ -15,7 +15,7 @@ app.get("/", (req, res) => {
 });
 
 app.post("/generate-image", async (req, res) => {
-    const { text: prompt } = req.body;  // <-- FIX: Asegurar que recibe "text"
+    const prompt = req.body.prompt || req.body.text;  // Acepta "prompt" y "text"
 
     if (!prompt) {
         return res.status(400).json({ error: "⚠️ Debes escribir una descripción." });
