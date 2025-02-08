@@ -7,11 +7,15 @@ const app = express();
 app.use(cors()); // Permitir conexiones desde el frontend
 app.use(express.json()); // Soportar JSON en las peticiones
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 8080;
 const REPLICATE_API_KEY = process.env.REPLICATE_API_KEY;
 
+app.get("/", (req, res) => {
+    res.send("🚀 API de Generación de Imágenes está funcionando correctamente.");
+});
+
 app.post("/generate-image", async (req, res) => {
-    const { prompt } = req.body;
+    const { text: prompt } = req.body;  // <-- FIX: Asegurar que recibe "text"
 
     if (!prompt) {
         return res.status(400).json({ error: "⚠️ Debes escribir una descripción." });
