@@ -8,7 +8,7 @@ app.use(cors());
 app.use(express.json());
 
 const PORT = process.env.PORT || 5000;
-const DEEPAI_API_KEY = process.env.DEEPAI_API_KEY;
+const DEEPAI_API_KEY = process.env.DEEPAI_API_KEY; // 🔹 Obtenemos la API Key de Railway
 
 app.post("/generate-image", async (req, res) => {
     const { prompt } = req.body;
@@ -20,18 +20,18 @@ app.post("/generate-image", async (req, res) => {
     try {
         const response = await axios.post(
             "https://api.deepai.org/api/text2img",
-            `text=${encodeURIComponent(prompt)}`,
+            { text: prompt },  // 🔹 Enviamos el prompt como parámetro
             {
                 headers: {
-                    "api-key": DEEPAI_API_KEY,
-                    "Content-Type": "application/x-www-form-urlencoded"
+                    "Api-Key": DEEPAI_API_KEY, // ✅ Agregamos la API Key en los headers
+                    "Content-Type": "application/json"
                 }
             }
         );
 
         res.json({ imageUrl: response.data.output_url });
     } catch (error) {
-        console.error("❌ Error en la API:", error.response ? error.response.data : error);
+        console.error("❌ Error en la API:", error.response ? error.response.data : error.message);
         res.status(500).json({ error: "⛔ Error generando la imagen." });
     }
 });
