@@ -8,7 +8,7 @@ app.use(cors());
 app.use(express.json());
 
 const PORT = process.env.PORT || 5000;
-const DEEPAI_API_KEY = process.env.DEEPAI_API_KEY; // Verifica que esté bien escrito
+const HUGGINGFACE_API_KEY = process.env.HUGGINGFACE_API_KEY;
 
 app.post("/generate-image", async (req, res) => {
     const { prompt } = req.body;
@@ -18,24 +18,25 @@ app.post("/generate-image", async (req, res) => {
     }
 
     try {
+        // Petición a la API de Hugging Face
         const response = await axios.post(
-            "https://api.deepai.org/api/text2img",
-            { text: prompt },
+            "https://api-inference.huggingface.co/models/CompVis/stable-diffusion-v1-4",
+            { inputs: prompt },
             {
                 headers: {
-                    "Api-Key": DEEPAI_API_KEY, // Usa la variable de entorno correctamente
+                    "Authorization": `Bearer ${HUGGINGFACE_API_KEY}`,
                     "Content-Type": "application/json"
                 }
             }
         );
 
-        if (response.data.output_url) {
-            res.json({ imageUrl: response.data.output_url });
-        } else {
-            throw new Error("⛔ Error generando la imagen.");
+        if (response.data.error) {
+            throw new Error(response.data.error);
         }
+
+        res.json({ imageUrl: response.data });
     } catch (error) {
-        console.error("❌ Error en la API:", error.response?.data || error.message);
+        console.error("❌ Error en la API:", error);
         res.status(500).json({ error: "⛔ Error generando la imagen." });
     }
 });
