@@ -19,11 +19,12 @@ app.post("/generate-image", async (req, res) => {
 
     try {
         // Petición a la API de Hugging Face
-        const response = await axios.post(
-            "https://api-inference.huggingface.co/models/CompVis/stable-diffusion-v1-4",
+               const response = await axios.post(
+            "https://api-inference.huggingface.co/models/black-forest-labs/FLUX.1-dev",
             { inputs: prompt },
             { headers: { Authorization: `Bearer ${HUGGINGFACE_API_KEY}` } }
         );
+        
 
 
         if (response.data.error) {
