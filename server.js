@@ -8,7 +8,7 @@ app.use(cors());
 app.use(express.json());
 
 const PORT = process.env.PORT || 5000;
-const REPLICATE_API_KEY = process.env.REPLICATE_API_KEY;
+const DEEPAI_API_KEY = process.env.DEEPAI_API_KEY;
 
 app.post("/generate-image", async (req, res) => {
     const { prompt } = req.body;
@@ -18,51 +18,21 @@ app.post("/generate-image", async (req, res) => {
     }
 
     try {
-        // Petición a Replicate
         const response = await axios.post(
-            "https://api.replicate.com/v1/predictions",
-            {
-                version: "ac732df83cea7fff18b8472768c88ad041fa750ff7682a21affe81863cbe77e4",
-                input: {
-                    prompt: prompt,
-                    scheduler: "K_EULER",  // Agregando scheduler como en tu ejemplo de Replicate
-                    width: 512,
-                    height: 512,
-                    num_outputs: 1
-                }
-            },
+            "https://api.deepai.org/api/text2img",
+            `text=${encodeURIComponent(prompt)}`,
             {
                 headers: {
-                    "Authorization": `Token ${REPLICATE_API_KEY}`,
-                    "Content-Type": "application/json"
+                    "api-key": DEEPAI_API_KEY,
+                    "Content-Type": "application/x-www-form-urlencoded"
                 }
             }
         );
 
-        const prediction = response.data;
-        let imageUrl = null;
-
-        // Esperar hasta que la imagen esté lista
-        while (!imageUrl) {
-            await new Promise(resolve => setTimeout(resolve, 3000));
-            const result = await axios.get(prediction.urls.get, {
-                headers: { "Authorization": `Token ${REPLICATE_API_KEY}` }
-            });
-
-            if (result.data.status === "succeeded") {
-                imageUrl = result.data.output[0];
-            } else if (result.data.status === "failed") {
-                throw new Error("⛔ Error generando la imagen.");
-            }
-        }
-
-        res.json({ imageUrl });
+        res.json({ imageUrl: response.data.output_url });
     } catch (error) {
-        console.error("❌ Error en la API:", error.response ? error.response.data : error.message);
-        res.status(500).json({ 
-            error: "⛔ Error generando la imagen.", 
-            details: error.response ? error.response.data : error.message
-        });
+        console.error("❌ Error en la API:", error.response ? error.response.data : error);
+        res.status(500).json({ error: "⛔ Error generando la imagen." });
     }
 });
 
