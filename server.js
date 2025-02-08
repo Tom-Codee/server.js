@@ -23,12 +23,16 @@ app.post("/generate-image", async (req, res) => {
 
     try {
         // Petición a Replicate
-        const response = await axios.post(
-            "https://api.replicate.com/v1/predictions",
-            {
-                version: "ac732df83cea7fff18b8472768c88ad041fa750ff7682a21affe81863cbe77e4", // <-- Usar el ID correcto de Replicate
-
-                input: { prompt: prompt }
+            const response = await axios.post(
+        "https://api.replicate.com/v1/predictions",
+        {
+            version: "db21a74b-4a19-49bc-bb17-9fda55a04c6c", // Usa la versión correcta del modelo
+            input: {
+                prompt: prompt,
+                width: 512,
+                height: 512,
+                num_outputs: 1
+            }
             },
             {
                 headers: {
@@ -37,6 +41,7 @@ app.post("/generate-image", async (req, res) => {
                 }
             }
         );
+
 
         const prediction = response.data;
         let imageUrl = null;
