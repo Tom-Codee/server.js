@@ -9,36 +9,39 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 8080;
 const HUGGINGFACE_API_KEY = process.env.HUGGINGFACE_API_KEY;
-const MODEL = "black-forest-labs/FLUX.1-dev"; // Cambia el modelo si es necesario
+const MODEL = "black-forest-labs/FLUX.1-dev";
 const API_URL = `https://api-inference.huggingface.co/models/${MODEL}`;
 
-// Ruta GET para probar si el servidor está corriendo
+// Ruta para verificar que el servidor está activo
 app.get("/", (req, res) => {
+    console.log("✅ Solicitud GET en /");
     res.send("✅ Servidor de generación de imágenes IA activo 🚀");
 });
 
 // Ruta POST para generar imágenes
 app.post("/generate-image", async (req, res) => {
-    const { prompt } = req.body;
+    console.log("📡 Recibida solicitud POST en /generate-image");
 
+    const { prompt } = req.body;
     if (!prompt) {
+        console.log("⚠️ Error: No se recibió prompt");
         return res.status(400).json({ error: "⚠️ Debes escribir una descripción." });
     }
 
     try {
-        // Petición a Hugging Face
+        console.log(`📡 Enviando petición a Hugging Face con prompt: ${prompt}`);
+
         const response = await axios.post(API_URL, { inputs: prompt }, {
             headers: { Authorization: `Bearer ${HUGGINGFACE_API_KEY}` },
-            responseType: "arraybuffer" // Recibir imagen como buffer
+            responseType: "arraybuffer"
         });
 
-        // Enviar imagen al frontend
+        console.log("✅ Imagen generada con éxito.");
         res.setHeader("Content-Type", "image/png");
         res.send(response.data);
     } catch (error) {
-        console.error("❌ Error en la API:", error.response ? error.response.data : error.message);
+        console.error("❌ Error en la API de Hugging Face:", error.response ? error.response.data : error.message);
 
-        // Manejo de errores
         if (error.response) {
             if (error.response.status === 503) {
                 return res.status(503).json({ error: "⚠️ El modelo está cargando. Intenta en unos minutos." });
@@ -52,5 +55,5 @@ app.post("/generate-image", async (req, res) => {
     }
 });
 
-// Iniciar el servidor correctamente en Railway
+// Iniciar el servidor en Railway
 app.listen(PORT, "0.0.0.0", () => console.log(`🚀 Servidor corriendo en el puerto ${PORT}`));
