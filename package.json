@@ -1,15 +1,15 @@
 {
   "name": "server",
   "version": "1.0.0",
-  "description": "Backend para generar imágenes con Replicate",
+  "description": "Servidor backend para generar imágenes IA",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
-    "express": "^4.17.1",
+    "express": "^4.18.2",
     "cors": "^2.8.5",
-    "axios": "^1.3.0",
+    "axios": "^1.3.2",
     "dotenv": "^16.0.3"
   }
 }
