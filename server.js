@@ -9,6 +9,8 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 8080;
 const HUGGINGFACE_API_KEY = process.env.HUGGINGFACE_API_KEY;
+const MODEL = "black-forest-labs/FLUX.1-dev"; // Cambia el modelo si es necesario
+const API_URL = `https://api-inference.huggingface.co/models/${MODEL}`;
 
 app.post("/generate-image", async (req, res) => {
     const { prompt } = req.body;
@@ -19,23 +21,30 @@ app.post("/generate-image", async (req, res) => {
 
     try {
         // Petición a la API de Hugging Face
-               const response = await axios.post(
-            "https://api-inference.huggingface.co/models/black-forest-labs/FLUX.1-dev",
-            { inputs: prompt },
-            { headers: { Authorization: `Bearer ${HUGGINGFACE_API_KEY}` } }
-        );
-        
+        const response = await axios.post(API_URL, { inputs: prompt }, {
+            headers: { Authorization: `Bearer ${HUGGINGFACE_API_KEY}` },
+            responseType: "arraybuffer"  // Recibir datos binarios en buffer (imagen)
+        });
 
+        // Enviar la imagen generada al frontend
+        res.setHeader("Content-Type", "image/png");
+        res.send(response.data);
+    } catch (error) {
+        console.error("❌ Error en la API:", error.response ? error.response.data : error.message);
 
-        if (response.data.error) {
-            throw new Error(response.data.error);
+        // Manejo de errores específicos
+        if (error.response) {
+            if (error.response.status === 503) {
+                return res.status(503).json({ error: "⚠️ El modelo está cargando. Intenta en unos minutos." });
+            }
+            if (error.response.status === 401) {
+                return res.status(401).json({ error: "⛔ API Key incorrecta o bloqueada." });
+            }
         }
 
-        res.json({ imageUrl: response.data });
-    } catch (error) {
-        console.error("❌ Error en la API:", error);
         res.status(500).json({ error: "⛔ Error generando la imagen." });
     }
 });
 
-app.listen(PORT, () => console.log(`🚀 Servidor corriendo en el puerto ${PORT}`));
+// Iniciar el servidor en el puerto correcto
+app.listen(PORT, () => console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`));
