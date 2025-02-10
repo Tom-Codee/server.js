@@ -12,13 +12,20 @@ const HUGGINGFACE_API_KEY = process.env.HUGGINGFACE_API_KEY;
 const MODEL = "black-forest-labs/FLUX.1-dev";
 const API_URL = `https://api-inference.huggingface.co/models/${MODEL}`;
 
-// Ruta para verificar que el servidor está activo
+// 🔄 Mantener Railway activo (Keep Alive cada 5 minutos)
+setInterval(() => {
+    axios.get("https://serverjs-production-429f.up.railway.app/")
+        .then(() => console.log("🔄 Keep-Alive enviado a Railway"))
+        .catch(err => console.error("⚠️ Error en Keep-Alive:", err));
+}, 300000); // 300000ms = 5 minutos
+
+// 📡 Ruta para verificar que el servidor está activo
 app.get("/", (req, res) => {
     console.log("✅ Solicitud GET en /");
     res.send("✅ Servidor de generación de imágenes IA activo 🚀");
 });
 
-// Ruta POST para generar imágenes
+// 🎨 Ruta POST para generar imágenes
 app.post("/generate-image", async (req, res) => {
     console.log("📡 Recibida solicitud POST en /generate-image");
 
@@ -49,11 +56,12 @@ app.post("/generate-image", async (req, res) => {
             if (error.response.status === 401) {
                 return res.status(401).json({ error: "⛔ API Key incorrecta o bloqueada." });
             }
+            return res.status(error.response.status).json({ error: error.response.data });
         }
 
         res.status(500).json({ error: "⛔ Error generando la imagen." });
     }
 });
 
-// Iniciar el servidor en Railway
+// 🚀 Iniciar el servidor en Railway
 app.listen(PORT, "0.0.0.0", () => console.log(`🚀 Servidor corriendo en el puerto ${PORT}`));
