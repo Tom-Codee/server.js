@@ -12,6 +12,12 @@ const HUGGINGFACE_API_KEY = process.env.HUGGINGFACE_API_KEY;
 const MODEL = "black-forest-labs/FLUX.1-dev"; // Cambia el modelo si es necesario
 const API_URL = `https://api-inference.huggingface.co/models/${MODEL}`;
 
+// Ruta GET para probar si el servidor está corriendo
+app.get("/", (req, res) => {
+    res.send("✅ Servidor de generación de imágenes IA activo 🚀");
+});
+
+// Ruta POST para generar imágenes
 app.post("/generate-image", async (req, res) => {
     const { prompt } = req.body;
 
@@ -20,19 +26,19 @@ app.post("/generate-image", async (req, res) => {
     }
 
     try {
-        // Petición a la API de Hugging Face
+        // Petición a Hugging Face
         const response = await axios.post(API_URL, { inputs: prompt }, {
             headers: { Authorization: `Bearer ${HUGGINGFACE_API_KEY}` },
-            responseType: "arraybuffer"  // Recibir datos binarios en buffer (imagen)
+            responseType: "arraybuffer" // Recibir imagen como buffer
         });
 
-        // Enviar la imagen generada al frontend
+        // Enviar imagen al frontend
         res.setHeader("Content-Type", "image/png");
         res.send(response.data);
     } catch (error) {
         console.error("❌ Error en la API:", error.response ? error.response.data : error.message);
 
-        // Manejo de errores específicos
+        // Manejo de errores
         if (error.response) {
             if (error.response.status === 503) {
                 return res.status(503).json({ error: "⚠️ El modelo está cargando. Intenta en unos minutos." });
@@ -46,5 +52,5 @@ app.post("/generate-image", async (req, res) => {
     }
 });
 
-// Iniciar el servidor en el puerto correcto
-app.listen(PORT, () => console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`));
+// Iniciar el servidor correctamente en Railway
+app.listen(PORT, "0.0.0.0", () => console.log(`🚀 Servidor corriendo en el puerto ${PORT}`));
